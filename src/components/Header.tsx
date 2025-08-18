@@ -12,6 +12,7 @@ export default function Header() {
       {navigations.map(nav => {
         return (
           <NavLink
+            key={nav.to}
             to={nav.to}
             className={({ isActive }) => (isActive ? 'text-red-500' : '')}>
             {nav.label}
