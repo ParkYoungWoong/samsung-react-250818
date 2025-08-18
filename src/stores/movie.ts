@@ -1,39 +1,85 @@
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
 import axios from 'axios'
+import { uniqBy } from 'lodash-es'
 
 export interface MoviesResponse {
-  Search: Search[]
+  Search: Movie[]
   totalResults: string
   Response: string
 }
-export interface Search {
+export interface Movie {
   Title: string
   Year: string
   imdbID: string
   Type: string
   Poster: string
 }
+export interface MovieDetails {
+  Title: string
+  Year: string
+  Rated: string
+  Released: string
+  Runtime: string
+  Genre: string
+  Director: string
+  Writer: string
+  Actors: string
+  Plot: string
+  Language: string
+  Country: string
+  Awards: string
+  Poster: string
+  Ratings: Rating[]
+  Metascore: string
+  imdbRating: string
+  imdbVotes: string
+  imdbID: string
+  Type: string
+  DVD: string
+  BoxOffice: string
+  Production: string
+  Website: string
+  Response: string
+}
+export interface Rating {
+  Source: string
+  Value: string
+}
 
 export const useMovieStore = create(
   combine(
     {
-      movies: [] as Search[], // 추론 안 되기 때문에 별도로 타입 단언(Assertion)!
+      movies: [] as Movie[], // 추론 안 되기 때문에 별도로 타입 단언(Assertion)!
       searchText: '',
-      isLoading: false
+      isLoading: false,
+      currentMovie: null as MovieDetails | null
     },
-    set => {
+    (set, get) => {
       return {
+        setSearchText: (searchText: string) => {
+          set({ searchText })
+        },
         fetchMovies: async () => {
           set({
             isLoading: true
           })
+          const { searchText } = get()
           const { data } = await axios<MoviesResponse>(
-            'https://omdbapi.com?apikey=7035c60c&s=batman'
+            `https://omdbapi.com?apikey=7035c60c&s=${searchText}`
           )
           set({
-            movies: data.Search,
+            movies: uniqBy(data.Search, 'imdbID'),
             isLoading: false
+          })
+        },
+        fetchMovie: async (id?: string) => {
+          if (!id) return
+          const { data } = await axios<MovieDetails>(
+            `https://omdbapi.com?apikey=7035c60c&i=${id}`
+          )
+          set({
+            currentMovie: data
           })
         }
       }

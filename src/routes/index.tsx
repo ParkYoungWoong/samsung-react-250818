@@ -3,6 +3,7 @@ import DefaultLayout from '@/routes/layouts/default'
 import Home from '@/routes/pages/Home'
 import About from '@/routes/pages/About'
 import Movies from '@/routes/pages/Movies'
+import MovieDetails from '@/routes/pages/MovieDetails'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
       {
         path: '/movies',
         element: <Movies />
+      },
+      {
+        path: '/movies/:movieId',
+        element: <MovieDetails />
       }
     ]
   }
