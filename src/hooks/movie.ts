@@ -16,6 +16,37 @@ export interface Movie {
   Type: string
   Poster: string
 }
+export interface MovieDetails {
+  Title: string
+  Year: string
+  Rated: string
+  Released: string
+  Runtime: string
+  Genre: string
+  Director: string
+  Writer: string
+  Actors: string
+  Plot: string
+  Language: string
+  Country: string
+  Awards: string
+  Poster: string
+  Ratings: Rating[]
+  Metascore: string
+  imdbRating: string
+  imdbVotes: string
+  imdbID: string
+  Type: string
+  DVD: string
+  BoxOffice: string
+  Production: string
+  Website: string
+  Response: string
+}
+export interface Rating {
+  Source: string
+  Value: string
+}
 
 export const useMovieStore = create(
   combine(
@@ -50,4 +81,18 @@ export function useMovies() {
     ...result,
     fetchQuery: () => queryClient.fetchQuery(options)
   }
+}
+
+export function useMovie(movieId?: string) {
+  return useQuery({
+    queryKey: ['movie', movieId],
+    queryFn: async () => {
+      if (!movieId) return
+      const { data } = await axios<MovieDetails>(
+        `https://omdbapi.com?apikey=7035c60c&i=${movieId}`
+      )
+      return data
+    },
+    staleTime: 1000 * 60 * 60 // 1h
+  })
 }
