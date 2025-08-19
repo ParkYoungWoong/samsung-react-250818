@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 
+export const name = 'Delayed'
+
 export default function Delayed({ wait }: { wait: number }) {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['delay', wait],
