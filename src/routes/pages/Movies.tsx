@@ -1,30 +1,34 @@
-import { useMovieStore } from '@/stores/movie'
+import { useState } from 'react'
 import { Link } from 'react-router'
+import { useMovieStore, useMovies } from '@/hooks/movie'
 
 export default function Movies() {
-  // 한 번에 1개씩만 훅 호출로 꺼내서 사용!
-  const fetchMovies = useMovieStore(state => state.fetchMovies)
-  const movies = useMovieStore(state => state.movies)
-  const isLoading = useMovieStore(state => state.isLoading)
   const searchText = useMovieStore(state => state.searchText)
   const setSearchText = useMovieStore(state => state.setSearchText)
+  const [inputText, setInputText] = useState(searchText)
+  const { data: movies = [], isFetching, fetchQuery } = useMovies()
+
+  function fetchMovies() {
+    setSearchText(inputText)
+    fetchQuery()
+  }
 
   return (
     <>
       <div>
         <input
           type="text"
-          value={searchText}
-          onChange={e => setSearchText(e.target.value)}
+          value={inputText}
+          onChange={e => setInputText(e.target.value)}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               fetchMovies()
             }
           }}
         />
-        <button onClick={fetchMovies}>Search!</button>
+        <button onClick={() => fetchMovies()}>Search!</button>
       </div>
-      {isLoading && <div>Loading...</div>}
+      {isFetching && <div>Loading...</div>}
       <ul>
         {movies.map(movie => {
           return (

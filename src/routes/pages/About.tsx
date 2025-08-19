@@ -1,14 +1,13 @@
-import { useCountStore } from '@/stores/count'
+import { useUserStore } from '@/stores/user'
 
 export default function About() {
-  const count = useCountStore(state => state.count)
-  const double = useCountStore(state => state.double)
-  const increase = useCountStore(state => state.increase)
+  const user = useUserStore(state => state.user)
+  const setFirstEmail = useUserStore(state => state.setFirstEmail)
   return (
     <>
       <h1>About!!</h1>
-      <h2 onClick={increase}>
-        {count} / {double}
+      <h2 onClick={() => setFirstEmail('test@gmail.com')}>
+        {JSON.stringify(user)}
       </h2>
     </>
   )
