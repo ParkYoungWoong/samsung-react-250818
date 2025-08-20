@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 
 export interface Todo {
   id: string // 할 일 ID
@@ -20,15 +20,38 @@ const api = axios.create({
 })
 
 export function useCreateTodo() {
+  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async (data: { title: string }) => {
       await api.post('/', data)
     },
-    onMutate: async () => {
+    onMutate: async data => {
       // 낙관적 업데이트 처리!
+      const todos = queryClient.getQueryData<Todo[]>(['todos'])
+      if (todos) {
+        queryClient.setQueryData(
+          ['todos'],
+          [
+            {
+              ...data,
+              id: Math.random().toString()
+            },
+            ...todos
+          ]
+        )
+      }
+      return { todos }
     },
-    onSuccess: async () => {}, // try
-    onError: async () => {}, // catch
+    onSuccess: async () => {
+      queryClient.invalidateQueries({
+        queryKey: ['todos']
+      })
+    }, // try
+    onError: async (_error, _data, context) => {
+      if (context && context.todos) {
+        queryClient.setQueryData(['todos'], context.todos)
+      }
+    }, // catch
     onSettled: async () => {} // finally
   })
 }
