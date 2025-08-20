@@ -66,4 +66,22 @@ export function useFetchTodos() {
   })
 }
 
-// 타입을 지정하는 행위! => Typing!
+export function useUpdateTodo() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (todo: Todo) => {
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      await api.put(`/${todo.id}`, todo)
+    },
+    onMutate: async todo => {
+      // 낙관적 업데이트 처리!
+    },
+    onSuccess: async () => {
+      queryClient.invalidateQueries({
+        queryKey: ['todos']
+      })
+    },
+    onError: async () => {},
+    onSettled: async () => {}
+  })
+}
