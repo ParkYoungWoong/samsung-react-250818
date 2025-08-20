@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react'
 export default function TodoItem({ todo }: { todo: Todo }) {
   const [isEditing, setIsEditing] = useState(false)
   const [title, setTitle] = useState(todo.title)
+  const [isDone, setIsDone] = useState(todo.done)
 
   const { isPending: isPendingForUpdate, mutateAsync: mutateAsyncForUpdate } =
     useUpdateTodo()
@@ -67,7 +68,15 @@ export default function TodoItem({ todo }: { todo: Todo }) {
         <>
           <input
             type="checkbox"
-            defaultChecked={todo.done}
+            checked={isDone}
+            onChange={e => {
+              const done = e.target.checked
+              setIsDone(done)
+              mutateAsyncForUpdate({
+                ...todo,
+                done
+              })
+            }}
           />
           <div className="grow-1">{todo.title}</div>
           <button onClick={onEditMode}>수정</button>
