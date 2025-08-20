@@ -2,28 +2,44 @@ import { useState, Fragment, useRef, useEffect } from 'react'
 import { Link } from 'react-router'
 import { useMovieStore, useInfiniteMovies } from '@/hooks/movie'
 import Loader from '@/components/Loader'
+import { useInView } from 'react-intersection-observer'
 
 export default function Movies() {
   const searchText = useMovieStore(state => state.searchText)
   const setSearchText = useMovieStore(state => state.setSearchText)
   const [inputText, setInputText] = useState(searchText)
-  const observerRef = useRef<HTMLDivElement>(null)
+  // const observerRef = useRef<HTMLDivElement>(null)
   const { data, isFetching, fetchNextPage } = useInfiniteMovies()
 
+  const { ref: observerRef, inView } = useInView({
+    rootMargin: '400px'
+  })
+
   useEffect(() => {
-    const io = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        // 다음 페이지 가져와!
-        fetchNextPage()
-      }
-    })
-    if (observerRef.current) {
-      io.observe(observerRef.current)
+    if (inView) {
+      fetchNextPage()
     }
-    return () => {
-      io.disconnect()
-    }
-  }, [])
+  }, [inView])
+
+  // useEffect(() => {
+  //   const io = new IntersectionObserver(
+  //     entries => {
+  //       if (entries[0].isIntersecting) {
+  //         // 다음 페이지 가져와!
+  //         fetchNextPage()
+  //       }
+  //     },
+  //     {
+  //       rootMargin: '400px'
+  //     }
+  //   )
+  //   if (observerRef.current) {
+  //     io.observe(observerRef.current)
+  //   }
+  //   return () => {
+  //     io.disconnect()
+  //   }
+  // }, [])
 
   function fetchMovies() {
     setSearchText(inputText)
@@ -69,10 +85,11 @@ export default function Movies() {
         ref={observerRef}
         className={`${isFetching ? 'hidden' : 'block'} h-[20px]`}></div>
 
-      <div className="relative h-[70px]">
-        <Loader />
-        {isFetching && <Loader />}
-      </div>
+      {isFetching && (
+        <div className="relative h-[70px]">
+          <Loader size={50} />
+        </div>
+      )}
     </>
   )
 }

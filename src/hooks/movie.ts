@@ -108,6 +108,7 @@ export function useInfiniteMovies() {
     queryKey: ['movies', searchText],
     queryFn: async ({ pageParam }) => {
       if (searchText.length < 3) return
+      await new Promise(resolve => setTimeout(resolve, 1000))
       const { data } = await axios<MoviesResponse>(
         `https://omdbapi.com?apikey=7035c60c&s=${searchText}&page=${pageParam}`
       )
@@ -128,18 +129,18 @@ export function useInfiniteMovies() {
     },
     initialPageParam: 1,
     enabled: Boolean(searchText),
-    staleTime: 1000 * 60 * 60 // 1h
-    // select: data => {
-    //   return {
-    //     ...data,
-    //     pages: data.pages.map(page => {
-    //       if (!page) return page
-    //       return {
-    //         ...page,
-    //         Search: uniqBy(page.Search, 'imdbID')
-    //       }
-    //     })
-    //   }
-    // }
+    staleTime: 1000 * 60 * 60, // 1h
+    select: data => {
+      return {
+        ...data,
+        pages: data.pages.map(page => {
+          if (!page) return page
+          return {
+            ...page,
+            Search: uniqBy(page.Search, 'imdbID')
+          }
+        })
+      }
+    }
   })
 }
